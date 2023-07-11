@@ -1,15 +1,19 @@
-import { useNavigate } from "react-router-dom";
+import { Form, useNavigate, useNavigation } from "react-router-dom";
 import PropTypes from "prop-types";
 import classes from "./EventForm.module.css";
 
 export default function EventForm({ /*method,*/ event }) {
   const navigate = useNavigate();
+  const navigation = useNavigation();
+
+  const isSubmitting = navigation.state === "submitting";
+
   function cancelHandler() {
     navigate("..");
   }
 
   return (
-    <form className={classes.form}>
+    <Form method="post" className={classes.form}>
       <p>
         <label htmlFor="title">Title</label>
         <input
@@ -51,15 +55,17 @@ export default function EventForm({ /*method,*/ event }) {
         />
       </p>
       <div className={classes.actions}>
-        <button type="button" onClick={cancelHandler}>
+        <button type="button" onClick={cancelHandler} disabled={isSubmitting}>
           Cancel
         </button>
-        <button>Save</button>
+        <button type="submit" disabled={isSubmitting}>
+          {isSubmitting ?  "Submitting...": "Save"}
+        </button>
       </div>
-    </form>
+    </Form>
   );
 }
 
 EventForm.propTypes = {
-  event: PropTypes.object.isRequired,
+  event: PropTypes.object,
 };
