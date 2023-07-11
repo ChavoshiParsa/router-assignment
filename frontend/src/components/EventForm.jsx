@@ -1,8 +1,14 @@
-import { Form, useNavigate, useNavigation } from "react-router-dom";
+import {
+  Form,
+  useActionData,
+  useNavigate,
+  useNavigation,
+} from "react-router-dom";
 import PropTypes from "prop-types";
 import classes from "./EventForm.module.css";
 
 export default function EventForm({ /*method,*/ event }) {
+  const data = useActionData();
   const navigate = useNavigate();
   const navigation = useNavigation();
 
@@ -14,6 +20,13 @@ export default function EventForm({ /*method,*/ event }) {
 
   return (
     <Form method="post" className={classes.form}>
+      {data && data.error && (
+        <ul>
+          {Object.values(data.errors).map((err) => (
+            <li key={err}>{err}</li>
+          ))}
+        </ul>
+      )}
       <p>
         <label htmlFor="title">Title</label>
         <input
@@ -59,7 +72,7 @@ export default function EventForm({ /*method,*/ event }) {
           Cancel
         </button>
         <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ?  "Submitting...": "Save"}
+          {isSubmitting ? "Submitting..." : "Save"}
         </button>
       </div>
     </Form>
