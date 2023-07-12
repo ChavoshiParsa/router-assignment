@@ -1,5 +1,7 @@
 import {
   Form,
+  json,
+  redirect,
   useActionData,
   useNavigate,
   useNavigation,
@@ -7,7 +9,7 @@ import {
 import PropTypes from "prop-types";
 import classes from "./EventForm.module.css";
 
-export default function EventForm({ /*method,*/ event }) {
+export default function EventForm({ method, event }) {
   const data = useActionData();
   const navigate = useNavigate();
   const navigation = useNavigation();
@@ -19,8 +21,8 @@ export default function EventForm({ /*method,*/ event }) {
   }
 
   return (
-    <Form method="post" className={classes.form}>
-      {data && data.error && (
+    <Form method={method} className={classes.form}>
+      {data && data.errors && (
         <ul>
           {Object.values(data.errors).map((err) => (
             <li key={err}>{err}</li>
@@ -79,6 +81,45 @@ export default function EventForm({ /*method,*/ event }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
+export async function action({ request, params }) {
+  const method = request.method;
+  const data = await request.formData();
+
+  const eventData = {
+    title: data.get("title"),
+    image: data.get("image"),
+    date: data.get("date"),
+    description: data.get("description"),
+  };
+
+  let url = "http://localhost:8080/events";
+
+  if (method === "PATCH") {
+    const eventId = params.eventId;
+    url = "http://localhost:8080/events/" + eventId;
+  }
+
+  const response = await fetch(url, {
+    method: method,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(eventData),
+  });
+
+  if (response.status === 422) {
+    return response;
+  }
+
+  if (!response.ok) {
+    throw json({ message: "Could not save event." }, { status: 500 });
+  }
+
+  return redirect("/events");
+}
+
 EventForm.propTypes = {
+  method: PropTypes.object,
   event: PropTypes.object,
 };
